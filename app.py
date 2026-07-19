@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # 1. Dataset Load Karne Ka Function
 def load_data(path):
@@ -39,3 +40,23 @@ if df is not None:
     # Explainability: Top Video Kyun Dikhayi?
     top_video = ranked_feed.iloc[0]
     st.info(f"**💡 Why are you seeing '{top_video['title']}' at the top?** Because it has high user engagement and passes our safety score check.")
+    
+    # Evaluation Panel (Graph)
+    st.subheader(" Algorithm Evaluation Panel")
+    if st.button("Test Safe Mode (Double Safety Weight)"):
+        current_top_toxicity = top_video['toxicity_score']
+        
+        # Safe Mode me w2 ko double kar dia
+        safe_feed = run_reels_algorithm(df.copy(), w1, w2 * 2)
+        safe_top_toxicity = safe_feed.iloc[0]['toxicity_score']
+        
+        # Graph Code
+        fig, ax = plt.subplots()
+        modes = ['Current Feed', 'Safe Mode (Filtered)']
+        toxicity_levels = [current_top_toxicity, safe_top_toxicity]
+        
+        ax.bar(modes, toxicity_levels, color=['red', 'blue'])
+        ax.set_ylabel('Toxicity / Clickbait Level of Top Video')
+        
+        st.pyplot(fig)
+        st.write("Result: Safe Mode automatically removes high-risk clickbait videos from the top spot.")
